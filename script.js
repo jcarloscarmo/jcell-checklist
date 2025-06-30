@@ -79,8 +79,17 @@ function setupEventListeners() {
     // PDF generation button
     const generatePDFButton = document.getElementById('generatePDF');
     generatePDFButton.addEventListener('click', function() {
-        generatePDF();
+        generateReport();
     });
+    
+    // Report action buttons
+    const copyReportButton = document.getElementById('copyReport');
+    const downloadPDFButton = document.getElementById('downloadPDF');
+    const newReportButton = document.getElementById('newReport');
+    
+    copyReportButton.addEventListener('click', copyReportToClipboard);
+    downloadPDFButton.addEventListener('click', downloadReportAsPDF);
+    newReportButton.addEventListener('click', startNewReport);
     
     // Form validation
     const serviceOrderInput = document.getElementById('serviceOrder');
@@ -194,35 +203,179 @@ function validateForm() {
 }
 
 /**
- * Generate PDF with all form data
+ * Generate and display report
  */
-async function generatePDF() {
+async function generateReport() {
     const generateButton = document.getElementById('generatePDF');
     const originalText = generateButton.textContent;
     
     try {
         // Disable button and show loading state
         generateButton.disabled = true;
-        generateButton.textContent = 'Gerando PDF...';
+        generateButton.textContent = 'Gerando Relatório...';
         
         // Collect form data
         const formData = collectFormData();
         
-        // Generate PDF content
-        const pdfContent = createPDFContent(formData);
+        // Generate report content
+        const reportHTML = createReportContent(formData);
         
-        // Create PDF
-        await createPDF(pdfContent, formData.serviceOrder);
+        // Display report
+        displayReport(reportHTML, formData);
+        
+        // Scroll to report
+        document.getElementById('reportDisplay').scrollIntoView({ 
+            behavior: 'smooth', 
+            block: 'start' 
+        });
+        
+    } catch (error) {
+        console.error('Erro ao gerar relatório:', error);
+        alert('Erro ao gerar relatório. Tente novamente.');
+    } finally {
+        // Reset button
+        generateButton.disabled = false;
+        generateButton.textContent = originalText;
+        validateForm();
+    }
+}
+
+/**
+ * Display report on page
+ */
+function displayReport(reportHTML, formData) {
+    const reportDisplay = document.getElementById('reportDisplay');
+    const reportContent = document.getElementById('reportContent');
+    
+    // Show report content
+    reportContent.innerHTML = reportHTML;
+    reportDisplay.classList.remove('hidden');
+    
+    // Hide form
+    document.querySelector('.form').style.display = 'none';
+    
+    // Store form data for PDF generation
+    window.currentReportData = formData;
+}
+
+/**
+ * Copy report to clipboard
+ */
+async function copyReportToClipboard() {
+    const reportContent = document.getElementById('reportContent');
+    const reportText = reportContent.innerText;
+    
+    try {
+        await navigator.clipboard.writeText(reportText);
+        
+        // Visual feedback
+        const copyButton = document.getElementById('copyReport');
+        const originalText = copyButton.textContent;
+        copyButton.textContent = '✅ Copiado!';
+        copyButton.style.background = '#28a745';
+        
+        setTimeout(() => {
+            copyButton.textContent = originalText;
+            copyButton.style.background = '';
+        }, 2000);
+        
+    } catch (error) {
+        console.error('Erro ao copiar:', error);
+        alert('Erro ao copiar relatório. Tente selecionar o texto manualmente.');
+    }
+}
+
+/**
+ * Download report as PDF
+ */
+async function downloadReportAsPDF() {
+    const downloadButton = document.getElementById('downloadPDF');
+    const originalText = downloadButton.textContent;
+    
+    try {
+        downloadButton.disabled = true;
+        downloadButton.textContent = '📄 Gerando...';
+        
+        if (!window.currentReportData) {
+            throw new Error('Dados do relatório não encontrados');
+        }
+        
+        // Generate PDF content
+        const pdfContent = createPDFContent(window.currentReportData);
+        
+        // Create and download PDF
+        await createPDF(pdfContent, window.currentReportData.serviceOrder);
         
     } catch (error) {
         console.error('Erro ao gerar PDF:', error);
         alert('Erro ao gerar PDF. Tente novamente.');
     } finally {
-        // Reset button
-        generateButton.disabled = false;
-        generateButton.textContent = originalText;
-        validateForm(); // Re-validate to set correct disabled state
+        downloadButton.disabled = false;
+        downloadButton.textContent = originalText;
     }
+}
+
+/**
+ * Start new report
+ */
+function startNewReport() {
+    // Show confirmation
+    if (confirm('Deseja começar um novo relatório? Os dados atuais serão perdidos.')) {
+        // Reset form
+        document.getElementById('checklistForm').reset();
+        
+        // Reset inspection states
+        inspectionStates = {};
+        initializeInspectionStates();
+        
+        // Reset photos
+        photos = {};
+        
+        // Clear photo previews
+        for (let i = 1; i <= 3; i++) {
+            const preview = document.getElementById(`preview${i}`);
+            preview.innerHTML = '';
+            preview.classList.remove('has-image');
+        }
+        
+        // Remove active states from inspection buttons
+        document.querySelectorAll('.btn-state').forEach(button => {
+            button.classList.remove('active');
+        });
+        
+        // Hide problem description
+        document.getElementById('problemDescription').classList.add('hidden');
+        
+        // Reset date
+        const today = new Date();
+        document.getElementById('date').value = formatDate(today);
+        
+        // Hide report and show form
+        document.getElementById('reportDisplay').classList.add('hidden');
+        document.querySelector('.form').style.display = 'block';
+        
+        // Clear stored data
+        window.currentReportData = null;
+        
+        // Scroll to top
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        
+        // Re-validate form
+        validateForm();
+    }
+}
+
+/**
+ * Create report content for display
+ */
+function createReportContent(data) {
+    const reportHTML = createPDFContent(data);
+    
+    // Add timestamp class for better styling
+    return reportHTML.replace(
+        /margin-top: 30px; text-align: center; font-size: 12px; color: #666;/,
+        'class="report-timestamp"'
+    );
 }
 
 /**
