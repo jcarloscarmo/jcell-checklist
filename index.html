@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JCELL - Checklist Técnico</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <h1 class="logo">JCELL</h1>
+            <p class="subtitle">Assistência Técnica</p>
+        </header>
+
+        <!-- Main Form -->
+        <form id="checklistForm" class="form">
+            <!-- Basic Information -->
+            <section class="section">
+                <h2>Informações Básicas</h2>
+                
+                <div class="form-group">
+                    <label for="date">Data:</label>
+                    <input type="text" id="date" name="date" class="form-input" placeholder="dd/mm/aaaa">
+                </div>
+
+                <div class="form-group">
+                    <label for="serviceOrder">Número da Ordem de Serviço:</label>
+                    <input type="number" id="serviceOrder" name="serviceOrder" class="form-input" placeholder="Digite o número da OS" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="customerName">Nome do Cliente:</label>
+                    <input type="text" id="customerName" name="customerName" class="form-input" placeholder="Digite o nome do cliente" required>
+                </div>
+            </section>
+
+            <!-- Repair Type -->
+            <section class="section">
+                <h2>O que vai ser consertado</h2>
+                <div class="checkbox-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" name="repairType" value="tela">
+                        <span class="checkmark"></span>
+                        Tela
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" name="repairType" value="conector">
+                        <span class="checkmark"></span>
+                        Conector
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" name="repairType" value="bateria">
+                        <span class="checkmark"></span>
+                        Bateria
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" name="repairType" value="sistema">
+                        <span class="checkmark"></span>
+                        Sistema
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" name="repairType" value="orcamento" id="budgetCheckbox">
+                        <span class="checkmark"></span>
+                        Orçamento
+                    </label>
+                </div>
+
+                <div id="problemDescription" class="form-group hidden">
+                    <label for="problemText">Descrição do Problema:</label>
+                    <textarea id="problemText" name="problemText" class="form-textarea" placeholder="Descreva o problema detalhadamente..."></textarea>
+                </div>
+            </section>
+
+            <!-- Visual Inspection -->
+            <section class="section">
+                <h2>Inspeção Visual</h2>
+                <div class="inspection-grid">
+                    <div class="inspection-item">
+                        <span class="inspection-label">Há botões físicos?</span>
+                        <div class="button-group" data-question="hasPhysicalButtons">
+                            <button type="button" class="btn-state btn-yes" data-state="yes">✅</button>
+                            <button type="button" class="btn-state btn-no" data-state="no">❌</button>
+                            <button type="button" class="btn-state btn-na" data-state="na">⚠️</button>
+                        </div>
+                    </div>
+
+                    <div class="inspection-item">
+                        <span class="inspection-label">Botões funcionam?</span>
+                        <div class="button-group" data-question="buttonsWork">
+                            <button type="button" class="btn-state btn-yes" data-state="yes">✅</button>
+                            <button type="button" class="btn-state btn-no" data-state="no">❌</button>
+                            <button type="button" class="btn-state btn-na" data-state="na">⚠️</button>
+                        </div>
+                    </div>
+
+                    <div class="inspection-item">
+                        <span class="inspection-label">Tela acende e exibe imagem?</span>
+                        <div class="button-group" data-question="screenWorks">
+                            <button type="button" class="btn-state btn-yes" data-state="yes">✅</button>
+                            <button type="button" class="btn-state btn-no" data-state="no">❌</button>
+                            <button type="button" class="btn-state btn-na" data-state="na">⚠️</button>
+                        </div>
+                    </div>
+
+                    <div class="inspection-item">
+                        <span class="inspection-label">Touch funciona?</span>
+                        <div class="button-group" data-question="touchWorks">
+                            <button type="button" class="btn-state btn-yes" data-state="yes">✅</button>
+                            <button type="button" class="btn-state btn-no" data-state="no">❌</button>
+                            <button type="button" class="btn-state btn-na" data-state="na">⚠️</button>
+                        </div>
+                    </div>
+
+                    <div class="inspection-item">
+                        <span class="inspection-label">Tela trincada?</span>
+                        <div class="button-group" data-question="screenCracked">
+                            <button type="button" class="btn-state btn-yes" data-state="yes">✅</button>
+                            <button type="button" class="btn-state btn-no" data-state="no">❌</button>
+                            <button type="button" class="btn-state btn-na" data-state="na">⚠️</button>
+                        </div>
+                    </div>
+
+                    <div class="inspection-item">
+                        <span class="inspection-label">Tela riscada?</span>
+                        <div class="button-group" data-question="screenScratched">
+                            <button type="button" class="btn-state btn-yes" data-state="yes">✅</button>
+                            <button type="button" class="btn-state btn-no" data-state="no">❌</button>
+                            <button type="button" class="btn-state btn-na" data-state="na">⚠️</button>
+                        </div>
+                    </div>
+
+                    <div class="inspection-item">
+                        <span class="inspection-label">Traseira quebrada?</span>
+                        <div class="button-group" data-question="backBroken">
+                            <button type="button" class="btn-state btn-yes" data-state="yes">✅</button>
+                            <button type="button" class="btn-state btn-no" data-state="no">❌</button>
+                            <button type="button" class="btn-state btn-na" data-state="na">⚠️</button>
+                        </div>
+                    </div>
+
+                    <div class="inspection-item">
+                        <span class="inspection-label">Traseira riscada?</span>
+                        <div class="button-group" data-question="backScratched">
+                            <button type="button" class="btn-state btn-yes" data-state="yes">✅</button>
+                            <button type="button" class="btn-state btn-no" data-state="no">❌</button>
+                            <button type="button" class="btn-state btn-na" data-state="na">⚠️</button>
+                        </div>
+                    </div>
+
+                    <div class="inspection-item">
+                        <span class="inspection-label">Lente da câmera danificada?</span>
+                        <div class="button-group" data-question="cameraLensDamaged">
+                            <button type="button" class="btn-state btn-yes" data-state="yes">✅</button>
+                            <button type="button" class="btn-state btn-no" data-state="no">❌</button>
+                            <button type="button" class="btn-state btn-na" data-state="na">⚠️</button>
+                        </div>
+                    </div>
+
+                    <div class="inspection-item">
+                        <span class="inspection-label">Câmera exposta?</span>
+                        <div class="button-group" data-question="cameraExposed">
+                            <button type="button" class="btn-state btn-yes" data-state="yes">✅</button>
+                            <button type="button" class="btn-state btn-no" data-state="no">❌</button>
+                            <button type="button" class="btn-state btn-na" data-state="na">⚠️</button>
+                        </div>
+                    </div>
+
+                    <div class="inspection-item">
+                        <span class="inspection-label">Câmera danificada?</span>
+                        <div class="button-group" data-question="cameraDamaged">
+                            <button type="button" class="btn-state btn-yes" data-state="yes">✅</button>
+                            <button type="button" class="btn-state btn-no" data-state="no">❌</button>
+                            <button type="button" class="btn-state btn-na" data-state="na">⚠️</button>
+                        </div>
+                    </div>
+
+                    <div class="inspection-item">
+                        <span class="inspection-label">Saídas de som danificadas?</span>
+                        <div class="button-group" data-question="audioOutputDamaged">
+                            <button type="button" class="btn-state btn-yes" data-state="yes">✅</button>
+                            <button type="button" class="btn-state btn-no" data-state="no">❌</button>
+                            <button type="button" class="btn-state btn-na" data-state="na">⚠️</button>
+                        </div>
+                    </div>
+
+                    <div class="inspection-item">
+                        <span class="inspection-label">Saídas de som sujas?</span>
+                        <div class="button-group" data-question="audioOutputDirty">
+                            <button type="button" class="btn-state btn-yes" data-state="yes">✅</button>
+                            <button type="button" class="btn-state btn-no" data-state="no">❌</button>
+                            <button type="button" class="btn-state btn-na" data-state="na">⚠️</button>
+                        </div>
+                    </div>
+
+                    <div class="inspection-item">
+                        <span class="inspection-label">O aparelho tem som?</span>
+                        <div class="button-group" data-question="hasSound">
+                            <button type="button" class="btn-state btn-yes" data-state="yes">✅</button>
+                            <button type="button" class="btn-state btn-no" data-state="no">❌</button>
+                            <button type="button" class="btn-state btn-na" data-state="na">⚠️</button>
+                        </div>
+                    </div>
+
+                    <div class="inspection-item">
+                        <span class="inspection-label">Entrada de fone de ouvido danificada?</span>
+                        <div class="button-group" data-question="headphoneJackDamaged">
+                            <button type="button" class="btn-state btn-yes" data-state="yes">✅</button>
+                            <button type="button" class="btn-state btn-no" data-state="no">❌</button>
+                            <button type="button" class="btn-state btn-na" data-state="na">⚠️</button>
+                        </div>
+                    </div>
+
+                    <div class="inspection-item">
+                        <span class="inspection-label">Aparelho liga (vibra)?</span>
+                        <div class="button-group" data-question="deviceTurnsOn">
+                            <button type="button" class="btn-state btn-yes" data-state="yes">✅</button>
+                            <button type="button" class="btn-state btn-no" data-state="no">❌</button>
+                            <button type="button" class="btn-state btn-na" data-state="na">⚠️</button>
+                        </div>
+                    </div>
+
+                    <div class="inspection-item">
+                        <span class="inspection-label">O celular carrega?</span>
+                        <div class="button-group" data-question="deviceCharges">
+                            <button type="button" class="btn-state btn-yes" data-state="yes">✅</button>
+                            <button type="button" class="btn-state btn-no" data-state="no">❌</button>
+                            <button type="button" class="btn-state btn-na" data-state="na">⚠️</button>
+                        </div>
+                    </div>
+
+                    <div class="inspection-item">
+                        <span class="inspection-label">Há sinais de umidade?</span>
+                        <div class="button-group" data-question="moistureSigns">
+                            <button type="button" class="btn-state btn-yes" data-state="yes">✅</button>
+                            <button type="button" class="btn-state btn-no" data-state="no">❌</button>
+                            <button type="button" class="btn-state btn-na" data-state="na">⚠️</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Photos -->
+            <section class="section">
+                <h2>Fotos</h2>
+                <div class="photos-section">
+                    <div class="photo-input-group">
+                        <label for="photo1" class="photo-label">Foto 1:</label>
+                        <input type="file" id="photo1" name="photo1" accept="image/*" capture="environment" class="photo-input">
+                        <div id="preview1" class="photo-preview"></div>
+                    </div>
+
+                    <div class="photo-input-group">
+                        <label for="photo2" class="photo-label">Foto 2:</label>
+                        <input type="file" id="photo2" name="photo2" accept="image/*" capture="environment" class="photo-input">
+                        <div id="preview2" class="photo-preview"></div>
+                    </div>
+
+                    <div class="photo-input-group">
+                        <label for="photo3" class="photo-label">Foto 3:</label>
+                        <input type="file" id="photo3" name="photo3" accept="image/*" capture="environment" class="photo-input">
+                        <div id="preview3" class="photo-preview"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Generate PDF Button -->
+            <div class="submit-section">
+                <button type="button" id="generatePDF" class="btn-generate">Gerar PDF</button>
+            </div>
+        </form>
+
+        <!-- Hidden PDF Content -->
+        <div id="pdfContent" class="pdf-content hidden">
+            <!-- PDF content will be generated here -->
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
