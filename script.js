@@ -256,6 +256,71 @@ function collectFormData() {
 }
 
 /**
+ * Analyze defects and suggest possible problems
+ */
+function analyzeDefects(data) {
+    const problems = [];
+    const defectCategories = {
+        screen: ['screenCracked', 'screenScratched', 'screenWorks', 'touchWorks'],
+        physical: ['backBroken', 'backScratched', 'hasPhysicalButtons', 'buttonsWork'],
+        camera: ['cameraLensDamaged', 'cameraExposed', 'cameraDamaged'],
+        audio: ['audioOutputDamaged', 'audioOutputDirty', 'hasSound', 'headphoneJackDamaged'],
+        power: ['deviceTurnsOn', 'deviceCharges'],
+        moisture: ['moistureSigns']
+    };
+
+    // Screen analysis
+    if (data.inspectionStates.screenCracked === 'yes' || data.inspectionStates.screenScratched === 'yes') {
+        problems.push('• Problema na tela: Possível necessidade de troca do display');
+    }
+    if (data.inspectionStates.touchWorks === 'no') {
+        problems.push('• Touch não funciona: Problema no digitalizador ou cabo flex');
+    }
+    if (data.inspectionStates.screenWorks === 'no') {
+        problems.push('• Tela não acende: Possível problema no LCD/OLED ou placa mãe');
+    }
+
+    // Physical damage analysis
+    if (data.inspectionStates.backBroken === 'yes') {
+        problems.push('• Traseira quebrada: Necessidade de troca da tampa traseira');
+    }
+    if (data.inspectionStates.buttonsWork === 'no') {
+        problems.push('• Botões não funcionam: Problema nos botões físicos ou cabo flex');
+    }
+
+    // Camera analysis
+    if (data.inspectionStates.cameraLensDamaged === 'yes' || data.inspectionStates.cameraDamaged === 'yes') {
+        problems.push('• Câmera danificada: Possível troca do módulo da câmera');
+    }
+    if (data.inspectionStates.cameraExposed === 'yes') {
+        problems.push('• Câmera exposta: Risco de danos internos, verificar proteção');
+    }
+
+    // Audio analysis
+    if (data.inspectionStates.hasSound === 'no') {
+        problems.push('• Sem som: Problema no alto-falante ou circuito de áudio');
+    }
+    if (data.inspectionStates.audioOutputDamaged === 'yes') {
+        problems.push('• Saída de áudio danificada: Necessária limpeza ou reparo');
+    }
+
+    // Power analysis
+    if (data.inspectionStates.deviceTurnsOn === 'no') {
+        problems.push('• Aparelho não liga: Problema na bateria, carregador ou placa mãe');
+    }
+    if (data.inspectionStates.deviceCharges === 'no') {
+        problems.push('• Não carrega: Problema no conector de carga ou circuito de carregamento');
+    }
+
+    // Moisture analysis
+    if (data.inspectionStates.moistureSigns === 'yes') {
+        problems.push('• Sinais de umidade: Risco de oxidação, limpeza completa necessária');
+    }
+
+    return problems;
+}
+
+/**
  * Create PDF content HTML
  */
 function createPDFContent(data) {
@@ -320,6 +385,18 @@ function createPDFContent(data) {
             <strong>Descrição do Problema:</strong><br>
             ${data.problemText}
         </div>` : '';
+
+    // Generate defect analysis
+    const detectedProblems = analyzeDefects(data);
+    const problemsHTML = detectedProblems.length > 0 ? 
+        `<h2>Análise de Defeitos e Possíveis Problemas</h2>
+        <div class="problems-section">
+            ${detectedProblems.map(problem => `<div class="problem-item">${problem}</div>`).join('')}
+        </div>` : 
+        `<h2>Análise de Defeitos</h2>
+        <div class="problems-section">
+            <div class="problem-item">• Nenhum defeito significativo detectado na inspeção visual</div>
+        </div>`;
     
     return `
         <div class="pdf-content">
@@ -343,6 +420,8 @@ function createPDFContent(data) {
             <div class="photo-grid">
                 ${photosHTML}
             </div>
+            
+            ${problemsHTML}
             
             <div style="margin-top: 30px; text-align: center; font-size: 12px; color: #666;">
                 Checklist gerado em ${new Date().toLocaleString('pt-BR')}
